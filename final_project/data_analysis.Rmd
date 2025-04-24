@@ -3,27 +3,377 @@ title: "data_analysis"
 output: html_document
 date: "2025-04-15"
 ---
-Replace this empty file with your data analysis .rmd file we created and started working on 04/15 in class! To do this go to your data cleaning file in R studio:
-File >> Save As >> Github >> data_analysis[yourname] (folder created by Github) >> final_project
+
+Descriptive statistics for my nominal and ordinal variables, which would be Family_History, Doctor_said_diabetes, What_A1C_should_be, Glyco_cat, and BMIcat. Starting by just running some frequency tables for all.
 ```{r}
-#this file is meant to be empty
-```
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+project_data <- read.csv("/Users/avahoffer/Documents/anth_241_final/clean_data")
 ```
 
-## Including Plots
+```{r}
+library(dplyr)
+count(project_data, Family_History)
+count(project_data, Doctor_said_diabetes)
+count(project_data, What_A1C_should_be)
+count(project_data, Glyco_cat)
+count(project_data, BMIcat)
+```
+wow! now we're gonna do some descriptive stats for my continuous variables, which are BMI, Glyco_Percent, Age, and Moderate. We're gonna get some means and medians through our Summary function :)
+```{r}
+#object_name <- c("variable1", "variable2", etc.)
+#summary(data[objectname])
+contin_variables <- c("BMI", "Glyco_Percent", "Age", "Moderate")
+summary(project_data[contin_variables])
+```
+now for some more descriptive stats for our continuous variables.
+```{r}
+library(tidyr)
+library(dplyr)
+#data%>% 
+#drop_na(variable)%>% 
+#summarize(mean(Variable), sd(Variable), count=n())
+project_data%>%
+  drop_na(BMI)%>%
+  summarize(mean(BMI), sd(BMI), count=n())
 
-You can also embed plots, for example:
+project_data%>%
+  drop_na(Glyco_Percent)%>%
+  summarize(mean(Glyco_Percent), sd(Glyco_Percent), count=n())
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+project_data%>%
+  drop_na(Age)%>%
+  summarize(mean(Age), sd(Age), count=n())
+
+project_data%>%
+  drop_na(Moderate)%>%
+  summarise(mean(Moderate), sd(Moderate), count=n())
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+Now to actually display our nominal and ordinal variables, we're gonna do some BAAARRR CHAAARRRTTTTS!
+```{r}
+library(ggplot2)
+#a. Bar chart for a nominal variable showing raw counts: Create the bar chart for BMI categories (BMIcat)
+#ggplot (data, aes(x=Catvar)) + geom_bar() + labs(title="", x="", y="")
+
+ggplot(project_data, aes(x=new_fam_history)) + geom_bar(fill="pink") + labs("Bar Chart of Diabetes Family History", x="Family History", y="Count")
+
+ggplot(project_data, aes(x=Doctor_said_diabetes)) + geom_bar(fill="pink") + labs("Bar Chart Table of Doctor Saying Diabetes", x="If Participants Doctor Said They Have Diabetes", y="Count")
+
+ggplot(project_data, aes(x=Glyco_cat)) + geom_bar(fill="pink") + labs("Bar Chart of Categorized A1C Levels", x="Categorized A1C Level", y="Count")
+
+ggplot(project_data, aes(x=What_A1C_should_be))+ geom_bar(fill="pink")+ labs("Bar Chart of What Doctor Said A1C Levels Should Be", x="A1C Level", y="Count")
+
+ggplot(project_data, aes(x=BMIcat))+geom_bar(fill="pink")+ labs("Bar Chart of BMI Categories", x="BMI Category", y="Count")
+
+```
+Right well now we have displayed some of our data, but what if we compared some nominal and ordinal variables? Time to make a grouped bar chart! Specifically, a group bar chart of Glyco_cat and BMIcat.
+
+```{r}
+
+#grouped bar chart:
+#ggplot(data, aes(x=Dependent variable, fill=Independent variable)) + geom_bar(position = "dodge") + labs(title="", x="Gender", y="Frequency")
+
+ggplot(project_data, aes(x=Glyco_cat, fill=BMIcat))+ geom_bar(position="dodge") + labs(title= "Bar Chart of Glyco Category and BMI Category", x="Comparison", y="Frequency")
+
+```
+Wow! It looks like people with diabetes and prediabetes have more obese people compared to the other BMI categories, but is that significant? Thats a question for later!
+
+Now lets compare Family_History and Glyco_cat
+```{r}
+library(ggplot2)
+#grouped bar chart:
+#ggplot(data, aes(x=Dependent variable, fill=Independent variable)) + geom_bar(position = "dodge") + labs(title="", x="Gender", y="Frequency")
+
+ggplot(project_data, aes(x=Glyco_cat, fill= new_fam_history))+ geom_bar(position="dodge") + labs(title="Bar Chart Comparing Family History and Glycohemoglobin Category", x= "Comparison", y="Frequency")
+
+```
+Huh, well thats interesting. It seems that some people with diabetes dont really have a family history of diabetes. 
+
+But now its time to see some variation in our continuous variables!
+Lets do a box and whisker plot!
+
+```{r}
+#a.ggplot(data, aes(x="", y=Contvar)) + geom_boxplot() + labs(y="", x="", title="")
+
+ggplot(project_data, aes(y=Glyco_Percent))+ geom_boxplot()+labs(y="Glycohemogoblin Percentage in Blood", title = "Box Plot of Glycohemogoblin")
+```
+Well that wasnt very helpful because its so itty bitty, maybe a histogram?
+Then I might do some more for the rest of my continuous variables, as that is a requirement.
+```{r}
+#colored histogram with 20 bins: ggplot(data, aes(x=contvar)) + geom_histogram(bins=20, color="white", fill="steelblue") + labs(title="Colored histogram with 20 bins", x="", y="")
+
+ggplot(project_data, aes(x=Glyco_Percent))+ geom_histogram(bins = 40, color="white", fill="pink")+ labs(title = "Glycohemogoblin Percent Histogram", x="Percentage", y="Count")
+
+ggplot(project_data, aes(x=BMI))+ geom_histogram(bins = 40, color="white", fill="pink")+ labs(title = "BMI Histogram", x="BMI", y="Count")
+
+ggplot(project_data, aes(x=Age))+ geom_histogram(bins = 40, color="white", fill="pink")+ labs(title = "Age Histogram", x="Age", y="Count")
+
+ggplot(project_data, aes(x=Moderate))+ geom_histogram(bins = 40, color="white", fill="pink")+ labs(title = "Moderate Minutes of Exercise Histogram", x="Minutes Per Day", y="Count")
+
+
+```
+
+Now its time to compare some continuous by categorical/nominal variables >:)
+T tests on Glyco_Percent by Family_History!!!
+```{r}
+#just gonna get some means and sds here
+project_data%>%
+  drop_na(Glyco_Percent)%>%
+  group_by(new_fam_history)%>%
+  summarize(mean(Glyco_Percent), sd(Glyco_Percent), count=n())
+
+hist(project_data$Glyco_Percent)
+#var.test(Contvar~Catvar, data=, alternative="two.sided")
+
+t.test(Glyco_Percent~new_fam_history, var.equal=FALSE, data=project_data)
+```
+
+Having issues with that :( lets just move on for now
+NEVERMIND WE LOVE MALENA IT WORKED!!! AND ITS SIGNIFIIICANNNNNNNT!
+KRUSKAL WALACE TIME!
+```{r}
+project_data%>%
+  drop_na(Glyco_Percent)%>%
+  group_by(BMIcat)%>%
+  summarize(mean(Glyco_Percent), sd(Glyco_Percent), count=n())
+
+#dunn.test(x=data$contvar, g=data$catvar, kw=TRUE)
+
+dunn.test(x=project_data$Glyco_Percent, g=project_data$BMIcat, kw=TRUE)
+```
+Wow, so basically everything is significant, and the overall p value is 0. 
+
+Thats cool, but what I feel like will be more revealing is a test with BMI and Glyco_cat, to see if BMI has an effect on for glyco level and whether or not you have diabetes.
+
+```{r}
+project_data%>%
+  drop_na(BMI)%>%
+  group_by(Glyco_cat)%>%
+  summarize(mean(BMI), sd(BMI), count=n())
+#dunn.test(x=data$contvar, g=data$catvar, kw=TRUE)
+
+dunn.test(x=project_data$BMI, g=project_data$Glyco_cat, kw=TRUE)
+
+```
+Wow! So there are significant differences between all the categories. 
+
+Heres where im gonna try my what_doctor_said dunn/kruskal test
+
+```{r}
+project_data%>%
+  drop_na(Glyco_Percent)%>%
+  group_by(Doctor_said_diabetes)%>%
+  summarize(mean(Glyco_Percent), sd(Glyco_Percent), count=n())
+
+dunn.test(x=project_data$Glyco_Percent, g=project_data$Doctor_said_diabetes, kw=TRUE)
+```
+
+
+Time to compare some nominal and ordinal significane levels with aaaaaaaa... CHI SQUARE TEST!!
+I think doing Glyco_cat by Family_history would be good, if Family_History works that is
+
+```{r}
+#a. Generate a two-way frequency table of BMIcat and HHFoodSec:
+#table_name <- xtabs(~ CatVar1 + CatVar2, data=)
+#print the table
+#show the table in percentages: prop.table(table_name)*100
+Glycocat_FamilyHistory <- xtabs(~Glyco_cat + new_fam_history, data=project_data)
+print(Glycocat_FamilyHistory)
+prop.table(Glycocat_FamilyHistory)*100
+#b. run the chi-square test:
+#chisq.test(table_name)
+chisq.test(Glycocat_FamilyHistory)
+```
+Family_History was being mean again, so we're gonna try a Chi square test with something else. 
+NOW IT WORKS! Wowza, and tis significant, which I guess it should be because glyco percent and fam history was significant too
+
+```{r}
+Glycocat_BMIcat <- xtabs(~Glyco_cat+ BMIcat, data=project_data)
+print(Glycocat_BMIcat)
+prop.table(Glycocat_BMIcat)*100
+
+chisq.test(Glycocat_BMIcat)
+```
+Okay, so, the p-value is waaaaaay less than 0.05, so there is a relationship between glyco cat and bmi cat. 
+
+
+I would also like to do a test to see if the difference between what the doctor said and glyco cat is significant. I want to know if people are aware that they have diabetes.
+
+```{r}
+#a. Generate a two-way frequency table of BMIcat and HHFoodSec:
+#table_name <- xtabs(~ CatVar1 + CatVar2, data=)
+#print the table
+#show the table in percentages: prop.table(table_name)*100
+
+Glycocat_Doctorsaid <- xtabs(~Glyco_cat + Doctor_said_diabetes, data=project_data)
+print(Glycocat_Doctorsaid)
+
+#b. run the chi-square test:
+#chisq.test(table_name)
+
+chisq.test(Glycocat_Doctorsaid)
+```
+So the p value is significant, so there is a relationship between glyco cat and what the doctor said. Maybe ANOVA would be good for this? Have to wait for Malena. Actually, I might go up and try a dunn test with it.
+
+Now, time to do some correlationnns! I think first I'll test to see if theres a correlation between age and glyco percent
+```{r}
+#scatter plot code: #ggplot(aes(x=DepVar, y=IndVar), data=) + geom_point(color="") + geom_smooth(method=lm, color="") + labs(x="", y="") + theme_bw()
+
+ggplot(aes(x=Glyco_Percent, y=BMI), data=project_data)+
+  geom_point(color="pink")+
+  geom_smooth(method=lm, color="blue")+
+  labs(x="Glycohemogoblin Percent", y="Age")+
+  theme_bw()
+
+#correlation test code: cor.test(data$DepVar, data$IndVar, method="pearson")
+
+cor.test(project_data$Glyco_Percent, project_data$BMI, method="pearson")
+
+```
+Okay, so the correlation coefficient is 0.18, and the p value is waaaaaaaaay low. 
+Now to try the same thing with glyco percent and moderate minutes of activity
+
+```{r}
+#scatter plot code: #ggplot(aes(x=DepVar, y=IndVar), data=) + geom_point(color="") + geom_smooth(method=lm, color="") + labs(x="", y="") + theme_bw()
+
+ggplot(aes(x=Glyco_Percent, y=Moderate), data=project_data)+
+  geom_point(color="yellow")+
+  geom_smooth(method=lm, color="lightpink")+
+  labs(x="Glycohemogoblin Percent", y="Minutes of Moderate Exercise Per Day")+
+  theme_bw()
+
+#correlation test code: cor.test(data$DepVar, data$IndVar, method="pearson")
+
+cor.test(project_data$Glyco_Percent, project_data$Moderate, method="pearson")
+```
+Well that one was not significant because the p-value is 0.21, which is greater than 0.05. 
+
+Now we're gonna use some linear regression models to see if we can use a continuous independent variable to test a dependent continuous variable!
+
+```{r}
+#model_name <- lm(DepVar~IndVar, data=)
+#summary(model_name)
+
+Moderate_GlycoPercent <- lm(Glyco_Percent~Moderate, data=project_data)
+summary(Moderate_GlycoPercent)
+```
+Okay, so the regression equation is Glyco_Percent= 5.78 + Moderate(-0.0005)
+The r-squared value is 0.0007, and the p-value is 0.21.
+From these results we know that there is no significant relationship between minutes of moderate actvity and glycohemogoblin percentage, and you have around a 0% chance of predicting someones Glyco percent based off of how much exercise they do. 
+
+Now I wanna see if you can predict someones Glyco percent based off of their BMI
+
+```{r}
+#model_name <- lm(DepVar~IndVar, data=)
+#summary(model_name)
+
+Glycopercent_BMI <- lm(Glyco_Percent~BMI, data=project_data)
+summary(Glycopercent_BMI)
+```
+Regression equation: Glyco_Percent= 5 + BMI(0.03)
+The r-squared is 0.03, and the p-value is way less than 0.05.
+So there is a significant relationship, but you have around a 0% chance of predicting someones Glyco percent based off of their BMI. 
+
+Now I want to calculate some odds ratios, to see the odds of having diabetes based on family history and bmi. But in order to do this, I have to ask for help. 
+
+Glyco_Percent is a continuous variable that I then converted to ordinal variable, Glyco_cat. I want to convert glyco_cat to a "Yes" or "No" question.
+
+```{r}
+#1. Create the odds table:
+#odds_table_name <- table(data$IndVar, data$DepVar)
+
+odds_BMI_Glcoyn <- table(project_data$BMIcat, project_data$new_glyco_yn)
+
+#2. Run the oddsratio on the table you created:
+#oddsratio(odds_table_name)
+
+oddsratio(odds_BMI_Glcoyn)
+
+#3. Graph the results in a mosaic table:
+#ggplot(data=) + geom_mosaic(aes(x=product(IndVar), fill=DepVar), na.rm=TRUE, show.legend=FALSE) + labs(title="", x="", y="")
+
+ggplot(data=project_data)+
+  geom_mosaic(aes(x=product(BMIcat), fill=new_glyco_yn), na.rm=TRUE, show.legend = FALSE)+
+  labs(title="Odds of Having Diabetes Based on BMI Category", x="BMI Category", y="Diabetes")
+```
+If you are obese you have a 2.31 times chance of developing diabetes compared to healthy people. If you are overweight you have a 1.72 times chance of developing diabetes. If you are underweight you have a 0.01 times chance of developing diabetes. 
+
+The chance of developing diabetes while obese is significant because the p value is 0.000000000000036 which is significant, the chance of developing diabetes while overweight is 0.00000053 which is significant, and the chance of developing diabetes while underweight is significant because the p value is 0.00012. 
+
+Now I would like to try it by family history again, to see if it works.
+
+
+
+```{r}
+#1. Create the odds table:
+#odds_table_name <- table(data$IndVar, data$DepVar)
+
+oddstable_glycoyn_by_doctorsaid <- table(project_data$Doctor_said_diabetes, project_data$new_glyco_yn)
+
+#2. Run the oddsratio on the table you created:
+#oddsratio(odds_table_name)
+
+oddsratio(oddstable_glycoyn_by_doctorsaid)
+
+#3. Graph the results in a mosaic table:
+#ggplot(data=) + geom_mosaic(aes(x=product(IndVar), fill=DepVar), na.rm=TRUE, show.legend=FALSE) + labs(title="", x="", y="")
+
+ggplot(data=project_data)+
+  geom_mosaic(aes(x=product(Doctor_said_diabetes), fill=new_glyco_yn), na.rm=TRUE, show.legend = FALSE)+
+  labs(title="Odds Table of Having Diabetes Based on What Your Doctor Said", x="What the Doctor Said", y="Diabetes")
+```
+I might try an ANOVA now, to see if its easier to understand than the dunn test.
+
+```{r}
+#1. find summary statistics of sample sizes, means, standard deviations, and 95% confidence intervals
+project_data_reduced<- project_data %>% 
+  drop_na(Glyco_cat,BMI)
+
+plotdata<- project_data_reduced%>%
+  group_by(Glyco_cat)%>%
+  summarize(n=n(),
+            mean = mean(BMI),
+            sd = sd(BMI),
+            ci=qt(0.975, df=n-1)*sd/sqrt(n))
+plotdata
+
+#2. test for group differences (ANOVA)
+#fit <- aov(Age~BMIcat, data=NHANESdata_reduced)
+
+fit <- aov(BMI~Glyco_cat, data=project_data_reduc)
+summary(fit)
+
+#3. Plot group means and confidence intervals to visualize these group differences.
+#library(ggplot2)
+
+ggplot(plotdata, aes(x=Glyco_cat, y=mean, group=1)) + 
+  geom_point(size=1, color="pink") +
+  geom_errorbar(aes(ymin=mean-ci,
+                    ymax=mean+ci),
+                width=.1)+
+  theme_bw()+
+  labs(x="Glycohemoglobin Category",
+       y="BMI",
+       title="Glycohemoglobin by BMI")
+
+```
+So it is significant, but im not sure why my graph isnt working. But since its significant, we'll do the turkey tukey thing.
+
+```{r}
+#1. calculates pairwise comparisons as a Tukey post hoc test
+pairwise <- TukeyHSD(fit)
+pairwise
+#2. create a data set of the above results
+BMI_Glycocat_plot <- as.data.frame(pairwise[[1]])
+BMI_Glycocat_plot$conditions <- row.names(BMI_Glycocat_plot)
+#3. Plot the results
+ggplot(data=BMI_Glycocat_plot, aes(x=conditions, y=diff)) +
+  geom_point(size=2, color="pink") +
+  geom_errorbar(aes(ymin=lwr, ymax=upr, width=.2)) +
+  geom_hline(yintercept=0, color="pink", linetype="dashed") +
+  labs(y="Differences in mean levels", x="",
+       title="95% family-wise confidence levels", x="Glyco Category", y="BMI") +
+  theme_bw() +
+  coord_flip()
+```
+
